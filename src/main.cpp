@@ -1,83 +1,110 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-
+#include <tuple>
 #include <string>
+#include <vector>
 
-struct {
+#include "types.hpp"
+#include "parser.hpp"
+#include "grid.hpp"
+#include "reader.hpp"
+#include "utils.hpp"
 
+#include "drawing/draw.hpp"
+#include "drawing/svg.hpp"
+
+
+struct cmd_options {
+    std::string input_filename;
+    std::string output_filename = "out.svg";
+
+    bool verbose = false;
 };
 
-void exit_error(const std::string& msg)
-{
-    std::cerr << msg << "\n";
-    std::exit(1);
+cmd_options parse_args(int argc, char** argv) {
+    cmd_options opts;
+
+    for (int i = 1; i < argc; ++i) {
+        std::string_view arg(argv[i]);
+        if (arg == "-o") {
+            if (i >= argc - 1) {
+                std::cout << "error: -o needs a value";
+                std::exit(1);
+            }
+            opts.output_filename = argv[++i];
+        } else if (arg == "-v") {
+            opts.verbose = true;
+        } else {
+            if (!opts.input_filename.empty()) {
+                std::cout << "error: multiple input files specified: '" << opts.input_filename << "' and '" << arg << "'\n";
+                std::exit(1);
+            }
+            opts.input_filename = arg;
+        }
+    }
+
+    if (opts.input_filename.empty()) {
+        std::cout << "error: no input file specified\n";
+        std::exit(1);
+    }
+
+    return opts;
 }
 
-bool try_read_word(std::stringstream& sstream, std::string& word)
-{
-    sstream >> word;
-    return static_cast<bool>(sstream);
+
+Grid make_grid(const Header& header, const ImageConfig& config) {
+    size_t max_blocks_x = (config.viewport_width - 2*config.border_size) / config.block_size;
+    size_t max_blocks_y = (config.viewport_height - 2*config.border_size) / config.block_size;
+
+    return Grid(header, max_blocks_y, max_blocks_x);
 }
 
 
+void draw_grid(const Grid& grid, ImageConfig& image_config) {
+    image_config.width = grid.cols() * image_config.block_size + 2*image_config.border_size;
+    image_config.height = grid.rows() * image_config.block_size + 2*image_config.border_size;
 
-int main(int argc, char** argv)
-{
-    if (argc < 2)
-    {
-        std::cerr << "Filename needs to be specified.\n";
+    SvgDrawer svg;
+    svg(grid, image_config);
+}
+
+
+int main(int argc, char** argv) {
+    cmd_options opts = parse_args(argc, argv);
+
+    std::ifstream file(opts.input_filename);
+
+    Header header;
+    auto status = parse_header(file, header);
+
+    if (!status) {
+        std::cerr << "Error:" << status.line << ":" << status.col << ": " << status.error_message << "\n";
         return 1;
     }
 
-    std::string filename = argv[1];
-    std::ifstream file(filename);
-
-    std::string line;
-
-    if (!std::getline(file, line))
-    {
-        std::cerr << "The header is missing.\n";
+    if (header.format == Format::array) {
+        std::cerr << "Array format is not supported. Only sparse matrices (coordinate format) are supported.\n";
         return 1;
     }
 
-    std::string word, declaration, format, type, symmetry;
-    std::stringstream line_stream(line);
+    ImageConfig image_config;
+    image_config.path = opts.output_filename;
 
-    line_stream >> word;
+    Grid grid = make_grid(header, image_config);
+    
+    if (opts.verbose) {
+        std::cout << "Matrix of size " << header.rows << " x " << header.cols << " with " << header.entries << " entries\n";
 
-    if (!try_read_word(line_stream, word) || !str_eq(word, "%%MatrixMarket"))
-    {
-        exit_error("Missing '%%MatrixMarket' declaration.");
+        std::cout << "Grid: size " << grid.rows() << " x " << grid.cols();
+        std::cout << " with " << grid.block_size() << " x " << grid.block_size() << " blocks";
+        std::cout << " of capacity " << grid.block_capacity() << "\n";
+
+        std::cout << "Image: size " << image_config.width << " x " << image_config.height;
+        std::cout << " with " << image_config.block_size << " x " << image_config.block_size << " blocks\n";
     }
+   
+    read_data_from_stream(file, grid);
 
-    if (!try_read_word(line_stream, word))
-    {
-        exit_error("Missing object declaration.");
-    }
-
-    if (!str_eq(word, "matrix"))
-    {
-        exit_error("This MM file does not encode a matrix.");
-    }
-
-    if (!try_read_word(line_stream, word))
-    {
-        exit_error("Missing type declaration.");
-    }
-
-    if (!str_eq(word, "real") &&
-        !str_eq(word, "integer") &&
-        !str_eq(word, "complex"))
-    {
-
-    }
-
-    line_stream >> declaration >> format >> type >> symmetry;
-
-    if (!line_stream) 
-    {
-        std::cerr << "The header is incomplete.";
-    }
-
+    draw_grid(grid, image_config);    
 }

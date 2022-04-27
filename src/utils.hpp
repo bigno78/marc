@@ -7,7 +7,7 @@ inline int to_lower(unsigned char a)
     return tolower(a);
 }
 
-inline bool str_eq(const std::string& lhs, const std::string& rhs)
+inline bool case_insensitive_eq(const std::string& lhs, const std::string& rhs)
 {
     if (lhs.size() != rhs.size())
         return false;
@@ -21,4 +21,9 @@ inline bool str_eq(const std::string& lhs, const std::string& rhs)
     }
 
     return true;
+}
+
+template<typename T>
+T div_ceil(T a, T b) {
+    return (a + b - 1)/b;
 }
