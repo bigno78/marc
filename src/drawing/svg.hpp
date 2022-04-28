@@ -74,6 +74,7 @@ struct SvgDrawer : Imagedrawer {
     void operator()(const Grid& grid, const ImageConfig& config) override {
         SvgImage image(config.width, config.height);
 
+        draw_background(image, config);
         draw_borders(image, config);
         draw_grid(image, config, grid);
 
@@ -81,6 +82,11 @@ struct SvgDrawer : Imagedrawer {
     }
 
 private:
+
+    void draw_background(SvgImage& image, const ImageConfig& config) {
+        Style style { "white", 1, "black", 0 };
+        image.draw_rectangle({0, 0, config.width, config.height}, style);
+    }
 
     void draw_borders(SvgImage& image, const ImageConfig& config) {
         Style border_style { "black", 1, "black", 0 };
