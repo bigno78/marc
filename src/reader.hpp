@@ -3,40 +3,55 @@
 #include <string>
 #include <istream>
 
-struct StreamReader {
+template<typename DataCollector>
+bool read_entry(const std::string& str, DataCollector& collector) {
+    size_t i = 0;
 
-    StreamReader(std::istream& in) : in(in) { };
+    while (i < str.size() && isspace(str[i])) {
+        ++i;
+    }
 
-    template<typename DataCollector>
-    void operator()(DataCollector& collecter) {
+    if (i >= str.size()) {
+        return true;
+    }
 
-    } 
+    if (!isdigit(str[i])) {
+        return false;
+    }
 
-private:
-    std::istream& in;
+    size_t row = 0;
+    while(i < str.size() && isdigit(str[i])) {
+        row = row*10 + (str[i] - '0');
+        ++i;
+    }
 
-};
+    while (i < str.size() && isspace(str[i])) {
+        ++i;
+    }
+
+    if (i >= str.size() || !isdigit(str[i])) {
+        return false;
+    }
+
+    size_t col = 0;
+    while(i < str.size() && isdigit(str[i])) {
+        col = col*10 + (str[i] - '0');
+        ++i;
+    }
+
+    collector.on_entry(row, col);
+
+    return true;
+}
+
 
 template<typename DataCollector>
 void read_data_from_stream(std::istream& in, DataCollector& collector) {
     std::string line;
 
     while (std::getline(in, line)) {
-        std::stringstream line_stream(line);
-        
-        line_stream >> std::ws;
-
-        if (line_stream.eof()) {
-            continue;
-        }
-
-        size_t row, col;
-        line_stream >> row >> col;
-
-        if (!line_stream) {
+        if (!read_entry(line, collector)) {
             return;
         }
-
-        collector.on_entry(row, col);
     }
 }
