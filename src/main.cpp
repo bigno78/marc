@@ -104,6 +104,23 @@ int main(int argc, char** argv) {
 
     if (opts.verbose) {
         std::cout << "Matrix of size " << header.rows << " x " << header.cols << " with " << header.entries << " entries\n";
+        std::cout << "Symmetry: ";
+        switch (header.symmetry) {
+            case Symmetry::general:
+                std::cout << "general\n";
+                break;
+            case Symmetry::symmetric:
+                std::cout << "symmetric\n";
+                break;
+            case Symmetry::skew_symmetric:
+                std::cout << "skew-symmetric\n";
+                break;
+            case Symmetry::hermitian:
+                std::cout << "hermitian\n";
+                break;
+            default:
+                std::cout << "Unknown symmetry\n";
+        }
     }
 
     ImageConfig image_config;
