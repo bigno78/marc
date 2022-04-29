@@ -54,17 +54,30 @@ cmd_options parse_args(int argc, char** argv) {
 }
 
 
-Grid make_grid(const Header& header, const ImageConfig& config) {
+Grid make_grid(const Header& header, const ImageConfig& config, const cmd_options& opts) {
     size_t max_blocks_x = (config.viewport_width - 2*config.border_size) / config.block_size;
     size_t max_blocks_y = (config.viewport_height - 2*config.border_size) / config.block_size;
 
-    return Grid(header, max_blocks_y, max_blocks_x);
+    Grid grid(header, max_blocks_y, max_blocks_x);
+
+    if (opts.verbose) {
+        std::cout << "Grid: size " << grid.rows() << " x " << grid.cols();
+        std::cout << " with " << grid.block_size() << " x " << grid.block_size() << " blocks";
+        std::cout << " of capacity " << grid.block_capacity() << "\n";
+    }
+
+    return grid;
 }
 
 
-void draw_grid(const Grid& grid, ImageConfig& image_config) {
+void draw_grid(const Grid& grid, ImageConfig& image_config, const cmd_options& opts) {
     image_config.width = grid.cols() * image_config.block_size + 2*image_config.border_size;
     image_config.height = grid.rows() * image_config.block_size + 2*image_config.border_size;
+
+    if (opts.verbose) {
+        std::cout << "Image: size " << image_config.width << " x " << image_config.height;
+        std::cout << " with " << image_config.block_size << " x " << image_config.block_size << " blocks\n";
+    }
 
     SvgDrawer svg;
     svg(grid, image_config);
@@ -89,23 +102,15 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    if (opts.verbose) {
+        std::cout << "Matrix of size " << header.rows << " x " << header.cols << " with " << header.entries << " entries\n";
+    }
+
     ImageConfig image_config;
     image_config.path = opts.output_filename;
 
-    Grid grid = make_grid(header, image_config);
-    
-    if (opts.verbose) {
-        std::cout << "Matrix of size " << header.rows << " x " << header.cols << " with " << header.entries << " entries\n";
-
-        std::cout << "Grid: size " << grid.rows() << " x " << grid.cols();
-        std::cout << " with " << grid.block_size() << " x " << grid.block_size() << " blocks";
-        std::cout << " of capacity " << grid.block_capacity() << "\n";
-
-        std::cout << "Image: size " << image_config.width << " x " << image_config.height;
-        std::cout << " with " << image_config.block_size << " x " << image_config.block_size << " blocks\n";
-    }
-   
+    Grid grid = make_grid(header, image_config, opts);
     read_data_from_stream(file, grid);
 
-    draw_grid(grid, image_config);    
+    draw_grid(grid, image_config, opts);  
 }
