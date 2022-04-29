@@ -129,7 +129,7 @@ Status parse_type(LineTokenizer& tokenizer, Header header) {
 }
 
 
-Status parse_symmetry(LineTokenizer& tokenizer, Header header) {
+Status parse_symmetry(LineTokenizer& tokenizer, Header& header) {
     if (!tokenizer.has_next()) {
         return Status::error("Missing symmetry declaration.", 0, tokenizer.current_pos());
     }
