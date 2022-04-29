@@ -12,13 +12,17 @@ struct Grid {
         block_size_( get_block_size(header.rows, header.cols, max_grid_rows, max_grid_cols) ),
         grid_rows( div_ceil(header.rows, block_size_) ),
         grid_cols( div_ceil(header.cols, block_size_) ),
-        data( grid_rows*grid_cols, 0 ) 
+        data( grid_rows*grid_cols, 0 ),
+        matrix_symmetry(header.symmetry)
     { 
 
     }
 
     void on_entry(size_t row, size_t col) {
-        at(row/block_size_, col/block_size_)++;
+        add_entry(row, col);
+        if (matrix_symmetry != Symmetry::general && row != col) {
+            add_entry(col, row);
+        }
     }
 
     size_t count_at(size_t row, size_t col) const {
@@ -41,6 +45,10 @@ struct Grid {
         return grid_cols;
     }
 
+    size_t entries() const {
+        return entries_count;
+    }
+
 private:
 
     const size_t& at(size_t row, size_t col) const {
@@ -49,6 +57,11 @@ private:
 
     size_t& at(size_t row, size_t col) {
         return const_cast<size_t&>(static_cast<const Grid&>(*this).at(row, col));
+    }
+
+    void add_entry(size_t row, size_t col) {
+        at(row/block_size_, col/block_size_)++;
+        entries_count++;
     }
 
     size_t get_block_size(size_t matrix_rows,
@@ -73,4 +86,8 @@ private:
     size_t grid_cols;
 
     std::vector<size_t> data;
+
+    size_t entries_count = 0;
+
+    Symmetry matrix_symmetry;
 };
