@@ -16,15 +16,15 @@
 #include "drawing/svg.hpp"
 
 
-struct cmd_options {
+struct CmdOptions {
     std::string input_filename;
     std::string output_filename = "out.svg";
 
     bool verbose = false;
 };
 
-cmd_options parse_args(int argc, char** argv) {
-    cmd_options opts;
+CmdOptions parse_args(int argc, char** argv) {
+    CmdOptions opts;
 
     for (int i = 1; i < argc; ++i) {
         std::string_view arg(argv[i]);
@@ -54,7 +54,7 @@ cmd_options parse_args(int argc, char** argv) {
 }
 
 
-Grid make_grid(const Header& header, const ImageConfig& config, const cmd_options& opts) {
+Grid make_grid(const Header& header, const ImageConfig& config, const CmdOptions& opts) {
     size_t max_blocks_x = (config.viewport_width - 2*config.border_size) / config.block_size;
     size_t max_blocks_y = (config.viewport_height - 2*config.border_size) / config.block_size;
 
@@ -70,7 +70,7 @@ Grid make_grid(const Header& header, const ImageConfig& config, const cmd_option
 }
 
 
-void draw_grid(const Grid& grid, ImageConfig& image_config, const cmd_options& opts) {
+void draw_grid(const Grid& grid, ImageConfig& image_config, const CmdOptions& opts) {
     image_config.width = grid.cols() * image_config.block_size + 2*image_config.border_size;
     image_config.height = grid.rows() * image_config.block_size + 2*image_config.border_size;
 
@@ -85,7 +85,7 @@ void draw_grid(const Grid& grid, ImageConfig& image_config, const cmd_options& o
 
 
 int main(int argc, char** argv) {
-    cmd_options opts = parse_args(argc, argv);
+    CmdOptions opts = parse_args(argc, argv);
 
     std::ifstream file(opts.input_filename);
 
