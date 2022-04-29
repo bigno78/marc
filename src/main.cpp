@@ -5,11 +5,12 @@
 #include <string>
 #include <vector>
 
-#include "types.hpp"
-#include "parser.hpp"
-#include "grid.hpp"
-#include "reader.hpp"
+#include "parsing/parser.hpp"
+#include "parsing/reader.hpp"
+
 #include "utils.hpp"
+#include "types.hpp"
+#include "grid.hpp"
 
 #include "drawing/draw.hpp"
 #include "drawing/svg.hpp"
