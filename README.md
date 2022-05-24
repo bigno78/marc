@@ -16,4 +16,19 @@ This can help you to identify the underlying structure of the matrix and see any
 
 Using this information you can then for instance choose an appropriate sparse matrix format 
 
+## 
 
+## Usage
+
+The basic usage is:
+
+```bash
+$ marc <input-file> -o <output-file>
+```
+
+If you don't specify the output filename using the `-o` option, `out.svg` is used by default.
+
+Other options include:
+
+ - `-v` enables verbose output (prints parameters of the matrix, the constructed grid and the output image).
+ - `-w <number>` and `-h <number>` are used to control the size of the output image. Currently, it is impossible to guarantee
