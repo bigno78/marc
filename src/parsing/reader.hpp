@@ -3,17 +3,27 @@
 #include <string>
 #include <istream>
 
+
 /**
- * Extracts and integers from `str` starting from index `i`.
- * If the integer doesn't fit into size_t return false,
- * othervise returns true.
+ * Extracts an integer from `str` starting from index `i`
+ * assigns it into `val` and assigns the first unprocessed index to `end`.
+ * 
+ * If the integer doesn't fit into size_t returns false,
+ * otherwise returns true.
+ * 
+ * Doesn't skip any leading whitespace.
  */
-bool read_integer(const std::string& str, size_t i, size_t& val, size_t& end) {
-    size_t res = 0;
+bool read_int(const std::string& str, size_t i, size_t& end, size_t& val) {
+    constexpr size_t max_val = size_t(-1);
+    constexpr size_t risky_val = max_val/10;
+    constexpr size_t max_digit = max_val % 10;
     
+    size_t res = 0;
     while(i < str.size() && isdigit(str[i])) {
-        size_t new_res = val*10 + (str[i] - '0');
-        if (new_res < res) {
+        size_t d = str[i] - '0';
+        if (res < risky_val || (res == risky_val && d <= max_digit)) {
+            res = res*10 + d;
+        } else {
             return false;
         }
         ++i;
@@ -25,8 +35,9 @@ bool read_integer(const std::string& str, size_t i, size_t& val, size_t& end) {
     return true;
 }
 
+
 template<typename DataCollector>
-bool read_entry(const std::string& str, DataCollector& collector) {
+bool process_entry(const std::string& str, DataCollector& collector) {
     size_t i = 0;
 
     while (i < str.size() && isspace(str[i])) {
@@ -41,11 +52,12 @@ bool read_entry(const std::string& str, DataCollector& collector) {
         return false;
     }
 
-    size_t row = 0;
-    while(i < str.size() && isdigit(str[i])) {
-        row = row*10 + (str[i] - '0');
-        ++i;
+    size_t row;
+    size_t end;
+    if (!read_int(str, i, end, row)) {
+        return false;
     }
+    i = end;
 
     while (i < str.size() && isspace(str[i])) {
         ++i;
@@ -55,13 +67,12 @@ bool read_entry(const std::string& str, DataCollector& collector) {
         return false;
     }
 
-    size_t col = 0;
-    while(i < str.size() && isdigit(str[i])) {
-        col = col*10 + (str[i] - '0');
-        ++i;
+    size_t col;
+    if (!read_int(str, i, end, col)) {
+        return false;
     }
 
-    collector.on_entry(row, col);
+    collector.on_entry(row - 1, col - 1);
 
     return true;
 }
@@ -72,7 +83,7 @@ void read_data_from_stream(std::istream& in, DataCollector& collector) {
     std::string line;
 
     while (std::getline(in, line)) {
-        if (!read_entry(line, collector)) {
+        if (!process_entry(line, collector)) {
             return;
         }
     }
