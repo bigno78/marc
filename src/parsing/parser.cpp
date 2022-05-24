@@ -73,7 +73,7 @@ Status validate_magic_text(LineTokenizer& tokenizer) {
 
     if (!case_insensitive_eq(token.word, "matrix")) {
         std::stringstream error_stream;
-        error_stream << "Ivalid object declaration. Expected 'matrix' but '" << token.word << "' found.";
+        error_stream << "Invalid object declaration. Expected 'matrix' but '" << token.word << "' found.";
         return Status::error(error_stream.str(), 0, token.start_col);
     }
 
@@ -81,7 +81,7 @@ Status validate_magic_text(LineTokenizer& tokenizer) {
 }
 
 
-Status parse_format(LineTokenizer& tokenizer, Header header) {
+Status parse_format(LineTokenizer& tokenizer, Header& header) {
     if (!tokenizer.has_next()) {
         return Status::error("Missing format declaration.", 0, tokenizer.current_pos());
     }
@@ -105,7 +105,7 @@ Status parse_format(LineTokenizer& tokenizer, Header header) {
 }
 
 
-Status parse_type(LineTokenizer& tokenizer, Header header) {
+Status parse_type(LineTokenizer& tokenizer, Header& header) {
     if (!tokenizer.has_next()) {
         return Status::error("Missing type declaration.", 0, tokenizer.current_pos());
     }
