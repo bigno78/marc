@@ -2,89 +2,152 @@
 
 #include <string>
 #include <istream>
+#include <array>
+#include <fstream>
+
+#include <cstdio>
+
+#include <sys/stat.h>
 
 
-/**
- * Extracts an integer from `str` starting from index `i`
- * assigns it into `val` and assigns the first unprocessed index to `end`.
- * 
- * If the integer doesn't fit into size_t returns false,
- * otherwise returns true.
- * 
- * Doesn't skip any leading whitespace.
- */
-bool read_int(const std::string& str, size_t i, size_t& end, size_t& val) {
-    constexpr size_t max_val = size_t(-1);
-    constexpr size_t risky_val = max_val/10;
-    constexpr size_t max_digit = max_val % 10;
-    
-    size_t res = 0;
-    while(i < str.size() && isdigit(str[i])) {
-        size_t d = str[i] - '0';
-        if (res < risky_val || (res == risky_val && d <= max_digit)) {
-            res = res*10 + d;
-        } else {
-            return false;
-        }
-        ++i;
+template<size_t N>
+struct FileReaderC {
+
+    FileReaderC(const std::string& filepath) : 
+        file(std::fopen(filepath.c_str(), "r"))
+    {
     }
 
-    end = i;
-    val = res;
+    bool error() const {
+        return file == nullptr || std::ferror(file);
+    }
 
-    return true;
-}
+    bool eof() const {
+        return i >= size && std::feof(file);
+    }
+
+    void seek(int pos) {
+        std::fseek(file, pos, SEEK_SET);
+    }
+
+    char get() {
+        if (i < size) {
+            return buffer[i++];
+        }
+
+        size = std::fread(buffer.data(), 1, N, file);
+        i = 0;
+
+        return i < size ? buffer[i++] : EOF;
+    }
+
+    ~FileReaderC() {
+        if (file) {
+            std::fclose(file);
+        }
+    }
+
+private:
+    FILE* file;
+
+    std::array<char, N> buffer;
+    std::size_t size = 0;
+    std::size_t i = 0;
+};
 
 
-template<typename DataCollector>
-bool process_entry(const std::string& str, DataCollector& collector) {
+template<size_t N>
+struct FileReaderStream {
+
+    FileReaderStream(const std::string& filepath) : 
+        file(filepath)
+    {
+    }
+
+    bool error() const {
+        return (bool)file;
+    }
+
+    bool eof() const {
+        return file.eof();
+    }
+
+    void seek(int pos) {
+        file.seekg(pos);
+    }
+
+    char get() {
+        if (i < size) {
+            return buffer[i++];
+        }
+
+        file.read(buffer.data(), N);
+        size = file.gcount();
+        i = 0;
+
+        return i < size ? buffer[i++] : EOF;
+    }
+
+private:
+    std::ifstream file;
+
+    std::array<char, N> buffer;
+    std::size_t size = 0;
+    std::size_t i = 0;
+};
+
+template<size_t N>
+struct FileReaderLine {
+
+    FileReaderLine(const std::string& filepath) : 
+        file(filepath)
+    {
+    }
+
+    FileReaderLine(std::ifstream fstream) : 
+        file(std::move(fstream))
+    {
+    }
+
+    bool error() const {
+        return (bool)file;
+    }
+
+    bool eof() const {
+        return file.eof();
+    }
+
+    void seek(int pos) {
+        file.seekg(pos);
+    }
+
+    bool getline(std::string& line) {
+        if (i < size) {
+            line = std::move(lines[i++]);
+            return true;
+        }
+
+        size = 0;
+        for (int j = 0; j < N; ++j) {
+            if (!std::getline(file, lines[j])) {
+                break;
+            }
+            size++;
+        }
+        i = 0;
+
+        if (size > 0) {
+            line = std::move(lines[i++]);
+            return true;
+        }
+
+        return false;
+    }
+
+private:
+    std::ifstream file;
+
+    std::array<std::string, N> lines;
+    size_t size = 0;
     size_t i = 0;
-
-    while (i < str.size() && isspace(str[i])) {
-        ++i;
-    }
-
-    if (i >= str.size()) {
-        return true;
-    }
-
-    if (!isdigit(str[i])) {
-        return false;
-    }
-
-    size_t row;
-    size_t end;
-    if (!read_int(str, i, end, row)) {
-        return false;
-    }
-    i = end;
-
-    while (i < str.size() && isspace(str[i])) {
-        ++i;
-    }
-
-    if (i >= str.size() || !isdigit(str[i])) {
-        return false;
-    }
-
-    size_t col;
-    if (!read_int(str, i, end, col)) {
-        return false;
-    }
-
-    collector.on_entry(row - 1, col - 1);
-
-    return true;
-}
-
-
-template<typename DataCollector>
-void read_data_from_stream(std::istream& in, DataCollector& collector) {
-    std::string line;
-
-    while (std::getline(in, line)) {
-        if (!process_entry(line, collector)) {
-            return;
-        }
-    }
-}
+};

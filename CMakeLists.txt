@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(marc)
 
-set(SOURCES src/main.cpp src/parsing/parser.cpp)
+set(SOURCES src/main.cpp src/parsing/header.cpp)
 
 add_executable(marc ${SOURCES})
 
