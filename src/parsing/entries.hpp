@@ -82,7 +82,7 @@ bool process_entry(const std::string& str, DataCollector& collector) {
 
 template<typename DataCollector>
 void read_data_from_stream(std::ifstream input, DataCollector& collector) {
-    FileReaderLine<64> in(std::move(input));
+    DoubleBufferedReader<128> in(std::move(input));
     std::string line;
     while (in.getline(line)) {
         process_entry(line, collector);
