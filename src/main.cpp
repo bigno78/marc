@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
     image_config.path = opts.output_filename;
 
     Grid grid = make_grid(header, image_config, opts);
-    read_data_from_stream(std::move(file), grid);
+    read_entries_custom(std::move(file), grid);
 
     draw_grid(grid, image_config, opts);  
 }

@@ -15,13 +15,13 @@
  * 
  * Doesn't skip any leading whitespace.
  */
-bool read_int(const std::string& str, size_t i, size_t& end, size_t& val) {
+bool read_int(const char* str, size_t i, size_t& end, size_t& val) {
     constexpr size_t max_val = size_t(-1);
     constexpr size_t risky_val = max_val/10;
     constexpr size_t max_digit = max_val % 10;
     
     size_t res = 0;
-    while(i < str.size() && isdigit(str[i])) {
+    while(isdigit(str[i])) {
         size_t d = str[i] - '0';
         if (res < risky_val || (res == risky_val && d <= max_digit)) {
             res = res*10 + d;
@@ -39,14 +39,14 @@ bool read_int(const std::string& str, size_t i, size_t& end, size_t& val) {
 
 
 template<typename DataCollector>
-bool process_entry(const std::string& str, DataCollector& collector) {
+bool process_entry(const char* str, DataCollector& collector) {
     size_t i = 0;
 
-    while (i < str.size() && isspace(str[i])) {
+    while (isspace(str[i])) {
         ++i;
     }
 
-    if (i >= str.size()) {
+    if (str[i] == '\0') {
         return true;
     }
 
@@ -61,11 +61,11 @@ bool process_entry(const std::string& str, DataCollector& collector) {
     }
     i = end;
 
-    while (i < str.size() && isspace(str[i])) {
+    while (isspace(str[i])) {
         ++i;
     }
 
-    if (i >= str.size() || !isdigit(str[i])) {
+    if (str[i] == '\0' || !isdigit(str[i])) {
         return false;
     }
 
@@ -81,10 +81,53 @@ bool process_entry(const std::string& str, DataCollector& collector) {
 
 
 template<typename DataCollector>
-void read_data_from_stream(std::ifstream input, DataCollector& collector) {
+void read_entries_buffered(std::ifstream input, DataCollector& collector) {
     FileReaderLine<64> in(std::move(input));
     std::string line;
     while (in.getline(line)) {
-        process_entry(line, collector);
+        process_entry(line.c_str(), collector);
+    }
+}
+
+
+template<typename DataCollector>
+void read_entries_getline(std::ifstream input, DataCollector& collector) {
+    std::string line;
+    while (std::getline(input, line)) {
+        process_entry(line.c_str(), collector);
+    }
+}
+
+
+template<typename DataCollector>
+void read_entries_custom(std::ifstream file, DataCollector& collector) {
+    constexpr size_t buffer_size = 4096;
+    std::array<char, buffer_size> buffer;
+
+    std::array<char, 1025> line;
+    size_t j = 0;
+
+    while (true) {
+        file.read(buffer.data(), buffer_size);
+        size_t bytes_read = file.gcount();
+        
+        for (size_t i = 0; i < bytes_read; ++i) {
+            if (j >= 1024) {
+                std::cerr << "LONG LINE\n";
+                return;
+            }
+
+            line[j++] = buffer[i];
+            
+            if (buffer[i] == '\n') {
+                line[j] = '\0';
+                process_entry(line.data(), collector);
+                j = 0;
+            }
+        }
+
+        if (!file) {
+            break;
+        }
     }
 }
