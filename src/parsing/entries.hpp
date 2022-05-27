@@ -6,6 +6,12 @@
 #include "reader.hpp"
 
 
+bool is_digit(char c) {
+
+    const uint8_t x = c;
+    return (x - '0') <= 9;
+}
+
 /**
  * Extracts an integer from `str` starting from index `i`
  * assigns it into `val` and assigns the first unprocessed index to `end`.
@@ -21,7 +27,7 @@ bool read_int(const char* str, size_t i, size_t& end, size_t& val) {
     constexpr size_t max_digit = max_val % 10;
     
     size_t res = 0;
-    while(isdigit(str[i])) {
+    while(is_digit(str[i])) {
         size_t d = str[i] - '0';
         if (res < risky_val || (res == risky_val && d <= max_digit)) {
             res = res*10 + d;
@@ -50,7 +56,7 @@ bool process_entry(const char* str, DataCollector& collector) {
         return true;
     }
 
-    if (!isdigit(str[i])) {
+    if (!is_digit(str[i])) {
         return false;
     }
 
@@ -65,7 +71,7 @@ bool process_entry(const char* str, DataCollector& collector) {
         ++i;
     }
 
-    if (str[i] == '\0' || !isdigit(str[i])) {
+    if (str[i] == '\0' || !is_digit(str[i])) {
         return false;
     }
 
