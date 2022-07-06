@@ -11,47 +11,10 @@
 #include "utils.hpp"
 #include "types.hpp"
 #include "grid.hpp"
+#include "cmd_options.hpp"
 
 #include "drawing/draw.hpp"
 #include "drawing/svg.hpp"
-
-
-struct CmdOptions {
-    std::string input_filename;
-    std::string output_filename = "out.svg";
-
-    bool verbose = false;
-};
-
-CmdOptions parse_args(int argc, char** argv) {
-    CmdOptions opts;
-
-    for (int i = 1; i < argc; ++i) {
-        std::string_view arg(argv[i]);
-        if (arg == "-o") {
-            if (i >= argc - 1) {
-                std::cout << "error: -o needs a value";
-                std::exit(1);
-            }
-            opts.output_filename = argv[++i];
-        } else if (arg == "-v") {
-            opts.verbose = true;
-        } else {
-            if (!opts.input_filename.empty()) {
-                std::cout << "error: multiple input files specified: '" << opts.input_filename << "' and '" << arg << "'\n";
-                std::exit(1);
-            }
-            opts.input_filename = arg;
-        }
-    }
-
-    if (opts.input_filename.empty()) {
-        std::cout << "error: no input file specified\n";
-        std::exit(1);
-    }
-
-    return opts;
-}
 
 
 Grid make_grid(const Header& header, const ImageConfig& config, const CmdOptions& opts) {
@@ -85,24 +48,28 @@ void draw_grid(const Grid& grid, ImageConfig& image_config, const CmdOptions& op
 
 
 int main(int argc, char** argv) {
-    CmdOptions opts = parse_args(argc, argv);
+    std::optional<CmdOptions> opts = parse_args(argc, argv);
 
-    std::ifstream file(opts.input_filename);
+    if (!opts) {
+        return EXIT_FAILURE;
+    }
+
+    std::ifstream file(opts->input_filename);
 
     Header header;
     auto status = parse_header(file, header);
 
     if (!status) {
         std::cerr << "Error:" << status.line << ":" << status.col << ": " << status.error_message << "\n";
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (header.format == Format::array) {
         std::cerr << "Array format is not supported. Only sparse matrices (coordinate format) are supported.\n";
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    if (opts.verbose) {
+    if (opts->verbose) {
         std::cout << "Matrix of size " << header.rows << " x " << header.cols << " with " << header.entries << " entries\n";
         std::cout << "Symmetry: ";
         switch (header.symmetry) {
@@ -124,10 +91,10 @@ int main(int argc, char** argv) {
     }
 
     ImageConfig image_config;
-    image_config.path = opts.output_filename;
+    image_config.path = opts->output_filename;
 
-    Grid grid = make_grid(header, image_config, opts);
+    Grid grid = make_grid(header, image_config, *opts);
     read_entries_custom(std::move(file), grid);
 
-    draw_grid(grid, image_config, opts);  
+    draw_grid(grid, image_config, *opts);  
 }
