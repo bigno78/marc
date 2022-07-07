@@ -16,6 +16,24 @@
 #include "drawing/draw.hpp"
 #include "drawing/svg.hpp"
 
+ImageConfig init_image_config(const Header& header, const CmdOptions& opts) {
+    ImageConfig config;
+
+    if (opts.width && opts.height) {
+        config.viewport_width = opts.width.value();
+        config.viewport_height = opts.height.value();
+    } else if(opts.width) {
+        config.viewport_width = opts.width.value();
+        config.viewport_height = (config.viewport_width*header.rows)/float(header.cols);
+    } else if (opts.height) {
+        config.viewport_height = opts.height.value();
+        config.viewport_width = (config.viewport_height*header.cols)/float(header.rows);
+    }
+
+    config.path = opts.output_filename;
+
+    return config;
+}
 
 Grid make_grid(const Header& header, const ImageConfig& config, const CmdOptions& opts) {
     size_t max_blocks_x = (config.viewport_width - 2*config.border_size) / config.block_size;
@@ -90,11 +108,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    ImageConfig image_config;
-    image_config.path = opts->output_filename;
-
+    ImageConfig image_config = init_image_config(header, *opts);
     Grid grid = make_grid(header, image_config, *opts);
     read_entries_custom(std::move(file), grid);
-
     draw_grid(grid, image_config, *opts);  
 }

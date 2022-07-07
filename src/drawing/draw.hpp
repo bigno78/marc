@@ -74,7 +74,7 @@ struct ImageConfig {
     size_t width;
     size_t height;
 
-    size_t block_size = 2;
+    size_t block_size = 1;
 
     size_t border_size = 2;
 
