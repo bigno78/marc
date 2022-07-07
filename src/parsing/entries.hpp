@@ -7,8 +7,7 @@
 
 
 bool is_digit(char c) {
-
-    const uint8_t x = c;
+    const unsigned x = c;
     return (x - '0') <= 9;
 }
 
@@ -100,7 +99,7 @@ template<typename DataCollector>
 void read_entries_getline(std::ifstream input, DataCollector& collector) {
     std::string line;
     while (std::getline(input, line)) {
-        process_entry(line.c_str(), collector);
+        if (!process_entry(line.c_str(), collector)) return;
     }
 }
 
