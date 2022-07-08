@@ -46,6 +46,16 @@ struct Grid {
         return entries_count_;
     }
 
+    size_t max_occupancy() const {
+        size_t res = 0;
+        for (auto x : data_) {
+            if (res < x) {
+                res = x;
+            }
+        }
+        return res;
+    }
+
 private:
 
     const size_t& at(size_t row, size_t col) const {

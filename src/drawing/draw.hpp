@@ -30,7 +30,7 @@ struct ColorPalette {
                 //{247,251,255}, 
                 //{222,235,247},
                 //{198,219,239},
-                {158,202,225}, 
+                //{158,202,225}, 
                 {107,174,214},
                 {66,146,198},
                 {33,113,181},
@@ -82,13 +82,15 @@ struct ImageConfig {
 
     size_t viewport_width = 600;
     size_t viewport_height = 600;
+
+    bool adjust_colors = false;
 };
 
 
-struct Imagedrawer {
+struct ImageDrawer {
 
     virtual void operator()(const Grid& grid, const ImageConfig& config) = 0;
 
-    virtual ~Imagedrawer() = default;
+    virtual ~ImageDrawer() = default;
 
 };

@@ -35,6 +35,7 @@ ImageConfig init_image_config(const Header& header, const CmdOptions& opts) {
     }
 
     config.path = opts.output_filename;
+    config.adjust_colors = opts.adjust_colors;
 
     return config;
 }

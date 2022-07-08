@@ -69,7 +69,7 @@ private:
 };
 
 
-struct SvgDrawer : Imagedrawer {
+struct SvgDrawer : ImageDrawer {
 
     void operator()(const Grid& grid, const ImageConfig& config) override {
         SvgImage image(config.width, config.height);
@@ -105,6 +105,8 @@ private:
         Style style { "black", 1, "black", 0 };
         Rect block_rect = { 0, config.border_size, config.block_size, config.block_size };
 
+        float max_occupancy = config.adjust_colors ? grid.max_occupancy() : grid.block_capacity();
+
         for (size_t row = 0; row < grid.rows(); ++row) {
             block_rect.x = config.border_size;
             for (size_t col = 0; col < grid.cols(); ++col) {
@@ -112,7 +114,7 @@ private:
                     block_rect.x += config.block_size;
                     continue;
                 }
-                float density = (float)grid.count_at(row, col)/grid.block_capacity();
+                float density = grid.count_at(row, col)/max_occupancy;
                 style.fill_color = config.color_palette.sample_color(density).to_string();
                 
                 image.draw_rectangle(block_rect, style);

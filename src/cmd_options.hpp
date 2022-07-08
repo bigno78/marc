@@ -14,6 +14,7 @@ struct CmdOptions {
     std::optional<size_t> height;
 
     bool verbose = false;
+    bool adjust_colors = false;
 };
 
 std::optional<size_t> parse_integer_argument(std::string_view arg_name, std::string_view arg_val) {
@@ -76,6 +77,8 @@ std::optional<CmdOptions> parse_args(int argc, char** argv) {
             if (!opts.height) {
                 return std::nullopt;
             }
+        } else if (arg == "-a" || arg == "--adjust-colors") {
+            opts.adjust_colors = true;
         } else {
             if (!opts.input_filename.empty()) {
                 std::cout << "Error: Multiple input files specified: '" << opts.input_filename << "' and '" << arg << "'.\n";
