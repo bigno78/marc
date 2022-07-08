@@ -40,6 +40,22 @@ $ cmake -DCMAKE_BUILD_TYPE=Release ..
 $ make
 ```
 
+## Installing
+
+If you want to install `marc` system wide you can simple run the following command in the build directory:
+
+```bash
+$ sudo cmake --install .
+```
+
+If you want to install it to the location of your choice use the `--prefix` option:
+
+```bash
+$ sudo cmake --install . --prefix <prefix>
+```
+
+The `marc` executable will by install to `<prefix>/bin`.
+
 ## Usage
 
 The basic usage is:
