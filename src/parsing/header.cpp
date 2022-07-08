@@ -188,7 +188,7 @@ Status parse_dimensions(std::istream& in, Header& header) {
         if (!line_stream.eof()) {
             size_t col = line_stream.tellg();
             line_stream >> header.rows >> header.cols >> header.entries;
-            
+
             if (!line_stream) {
                 return Status::error("Invalid matrix dimensions.", line_no + 1, col + 1);
             }

@@ -24,7 +24,7 @@ bool is_digit(char c) {
  */
 Status read_int(const char* str, size_t i, size_t& end, size_t& val) {
     size_t start = i;
-    
+
     constexpr size_t max_val = size_t(-1);
     constexpr size_t risky_val = max_val/10;
     constexpr size_t max_digit = max_val % 10;
