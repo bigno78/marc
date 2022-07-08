@@ -4,6 +4,7 @@
 #include <string>
 
 #include "parsing/status.hpp"
+#include "grid.hpp"
 #include "types.hpp"
 
 
@@ -46,8 +47,7 @@ Status read_int(const char* str, size_t i, size_t& end, size_t& val) {
 }
 
 
-template<typename DataCollector>
-Status process_entry(const char* str, const Header& header, DataCollector& collector) {
+Status process_entry(const char* str, const Header& header, Grid& grid) {
     size_t i = 0;
 
     while (isspace(str[i])) {
@@ -94,19 +94,18 @@ Status process_entry(const char* str, const Header& header, DataCollector& colle
         return Status::error("Col index out of bounds.", -1, start + 1);
     }
 
-    collector.on_entry(row - 1, col - 1);
+    grid.on_entry(row - 1, col - 1);
 
     return Status::success();
 }
 
 
-template<typename DataCollector>
-Status read_entries_getline(std::ifstream& input, const Header& header, DataCollector& collector) {
+Status read_entries_getline(std::ifstream& input, const Header& header, Grid& grid) {
     size_t line_no = header.size + 1;
     std::string line;
 
     while (std::getline(input, line)) {
-        auto status = process_entry(line.c_str(), header, collector);
+        auto status = process_entry(line.c_str(), header, grid);
         if (!status) {
             status.line = line_no + 1;
             return status;
@@ -118,8 +117,7 @@ Status read_entries_getline(std::ifstream& input, const Header& header, DataColl
 }
 
 
-template<typename DataCollector>
-Status read_entries_custom(std::ifstream& file, const Header& header, DataCollector& collector) {
+Status read_entries_custom(std::ifstream& file, const Header& header, Grid& grid) {
     constexpr size_t buffer_size = 4096;
     std::array<char, buffer_size> buffer = { 0 };
 
@@ -142,7 +140,7 @@ Status read_entries_custom(std::ifstream& file, const Header& header, DataCollec
                 line[j] = '\0';
                 j = 0;
 
-                auto status = process_entry(line.data(), header, collector);
+                auto status = process_entry(line.data(), header, grid);
                 if (!status) {
                     status.line = line_no + 1;
                     return status;
