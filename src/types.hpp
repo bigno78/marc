@@ -29,4 +29,6 @@ struct Header {
     std::size_t rows;
     std::size_t cols;
     std::size_t entries;
+
+    std::size_t size; // size of the header in lines
 };

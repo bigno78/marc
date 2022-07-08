@@ -113,7 +113,8 @@ Status parse_required_param(LineTokenizer& tokenizer, const Iterable& options, F
     size_t i = index_of(token.word, options);
 
     if (i == options.size()) {
-        std::string error_msg = "Unexpected header declaration '" + token.word + "'. Expected one of: " + stringify(options) + ".";
+        std::string error_msg = "Unexpected header declaration '" + token.word 
+                              + "'. Expected one of: " + stringify(options) + ".";
         return Status::error(error_msg, 1, token.start_col + 1);
     }
 
@@ -189,8 +190,10 @@ Status parse_dimensions(std::istream& in, Header& header) {
             line_stream >> header.rows >> header.cols >> header.entries;
             
             if (!line_stream) {
-                return Status::error("Invalid matrix dimensions.", line_no, col + 1);
+                return Status::error("Invalid matrix dimensions.", line_no + 1, col + 1);
             }
+
+            header.size = line_no;
 
             return Status::success();
         }

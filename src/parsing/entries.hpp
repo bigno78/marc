@@ -3,7 +3,8 @@
 #include <fstream>
 #include <string>
 
-#include "reader.hpp"
+#include "parsing/status.hpp"
+#include "types.hpp"
 
 
 bool is_digit(char c) {
@@ -20,18 +21,20 @@ bool is_digit(char c) {
  * 
  * Doesn't skip any leading whitespace.
  */
-bool read_int(const char* str, size_t i, size_t& end, size_t& val) {
+Status read_int(const char* str, size_t i, size_t& end, size_t& val) {
+    size_t start = i;
+    
     constexpr size_t max_val = size_t(-1);
     constexpr size_t risky_val = max_val/10;
     constexpr size_t max_digit = max_val % 10;
-    
+
     size_t res = 0;
     while(is_digit(str[i])) {
         size_t d = str[i] - '0';
         if (res < risky_val || (res == risky_val && d <= max_digit)) {
             res = res*10 + d;
         } else {
-            return false;
+            return Status::error("Value is too large and would cause overflow.", -1, start + 1);
         }
         ++i;
     }
@@ -39,12 +42,12 @@ bool read_int(const char* str, size_t i, size_t& end, size_t& val) {
     end = i;
     val = res;
 
-    return true;
+    return Status::success();
 }
 
 
 template<typename DataCollector>
-bool process_entry(const char* str, DataCollector& collector) {
+Status process_entry(const char* str, const Header& header, DataCollector& collector) {
     size_t i = 0;
 
     while (isspace(str[i])) {
@@ -52,82 +55,100 @@ bool process_entry(const char* str, DataCollector& collector) {
     }
 
     if (str[i] == '\0') {
-        return true;
+        return Status::success();
     }
 
     if (!is_digit(str[i])) {
-        return false;
+        return Status::error("Unexpected character. Expected row index.", -1, i + 1);
     }
 
+    size_t start = i;
     size_t row;
     size_t end;
-    if (!read_int(str, i, end, row)) {
-        return false;
+    auto status = read_int(str, i, end, row);
+    if (!status) {
+        return status;
     }
     i = end;
+
+    if (row > header.rows) {
+        return Status::error("Row index out of bounds.", -1, start + 1);
+    }
 
     while (isspace(str[i])) {
         ++i;
     }
 
     if (str[i] == '\0' || !is_digit(str[i])) {
-        return false;
+        return Status::error("Unexpected character. Expected column index.", -1, i + 1);
     }
 
+    start = i;
     size_t col;
-    if (!read_int(str, i, end, col)) {
-        return false;
+    status = read_int(str, i, end, col);
+    if (!status) {
+        return status;
+    }
+
+    if (col > header.cols) {
+        return Status::error("Col index out of bounds.", -1, start + 1);
     }
 
     collector.on_entry(row - 1, col - 1);
 
-    return true;
+    return Status::success();
 }
 
 
 template<typename DataCollector>
-void read_entries_buffered(std::ifstream input, DataCollector& collector) {
-    FileReaderLine<64> in(std::move(input));
+Status read_entries_getline(std::ifstream& input, const Header& header, DataCollector& collector) {
+    size_t line_no = header.size + 1;
     std::string line;
-    while (in.getline(line)) {
-        process_entry(line.c_str(), collector);
-    }
-}
 
-
-template<typename DataCollector>
-void read_entries_getline(std::ifstream input, DataCollector& collector) {
-    std::string line;
     while (std::getline(input, line)) {
-        if (!process_entry(line.c_str(), collector)) return;
+        auto status = process_entry(line.c_str(), header, collector);
+        if (!status) {
+            status.line = line_no + 1;
+            return status;
+        }
+        ++line_no;
     }
+
+    return Status::success();
 }
 
 
 template<typename DataCollector>
-void read_entries_custom(std::ifstream file, DataCollector& collector) {
+Status read_entries_custom(std::ifstream& file, const Header& header, DataCollector& collector) {
     constexpr size_t buffer_size = 4096;
-    std::array<char, buffer_size> buffer;
+    std::array<char, buffer_size> buffer = { 0 };
 
-    std::array<char, 1025> line;
+    std::array<char, 1025> line = { 0 };
     size_t j = 0;
+    size_t line_no = header.size + 1;
 
     while (true) {
         file.read(buffer.data(), buffer_size);
         size_t bytes_read = file.gcount();
-        
+
         for (size_t i = 0; i < bytes_read; ++i) {
             if (j >= 1024) {
-                std::cerr << "LONG LINE\n";
-                return;
+                return Status::error("Line is too long (over 1024 chars).", line_no + 1, 1);
             }
 
             line[j++] = buffer[i];
-            
+
             if (buffer[i] == '\n') {
                 line[j] = '\0';
-                process_entry(line.data(), collector);
                 j = 0;
+
+                auto status = process_entry(line.data(), header, collector);
+                if (!status) {
+                    status.line = line_no + 1;
+                    return status;
+                }
+
+                ++line_no;
             }
         }
 
@@ -135,4 +156,6 @@ void read_entries_custom(std::ifstream file, DataCollector& collector) {
             break;
         }
     }
+
+    return Status::success();
 }

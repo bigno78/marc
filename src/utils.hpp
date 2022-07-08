@@ -2,13 +2,11 @@
 
 #include <string>
 
-inline int to_lower(unsigned char a)
-{
+inline int to_lower(unsigned char a) {
     return tolower(a);
 }
 
-inline bool case_insensitive_eq(const std::string& lhs, const std::string& rhs)
-{
+inline bool case_insensitive_eq(const std::string& lhs, const std::string& rhs) {
     if (lhs.size() != rhs.size())
         return false;
 

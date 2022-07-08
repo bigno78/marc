@@ -16,6 +16,10 @@
 #include "drawing/draw.hpp"
 #include "drawing/svg.hpp"
 
+void print_parsing_error(const Status& status) {
+    std::cerr << "Error:" << status.line << ":" << status.col << ": " << status.error_message << "\n";
+}
+
 ImageConfig init_image_config(const Header& header, const CmdOptions& opts) {
     ImageConfig config;
 
@@ -78,7 +82,7 @@ int main(int argc, char** argv) {
     auto status = parse_header(file, header);
 
     if (!status) {
-        std::cerr << "Error:" << status.line << ":" << status.col << ": " << status.error_message << "\n";
+        print_parsing_error(status);
         return EXIT_FAILURE;
     }
 
@@ -110,6 +114,14 @@ int main(int argc, char** argv) {
 
     ImageConfig image_config = init_image_config(header, *opts);
     Grid grid = make_grid(header, image_config, *opts);
-    read_entries_custom(std::move(file), grid);
-    draw_grid(grid, image_config, *opts);  
+
+    status = read_entries_custom(file, header, grid);
+    if (!status) {
+        print_parsing_error(status);
+        return EXIT_FAILURE;
+    }
+
+    draw_grid(grid, image_config, *opts);
+
+    return EXIT_SUCCESS;
 }
