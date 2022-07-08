@@ -43,16 +43,16 @@ struct ColorPalette {
         if (val == 0) {
             return { 255, 255, 255 };
         }
-        
+
         float w = 1.0/(colors.size() - 1);
-        
+
         size_t i = val*(colors.size() - 1);
-        
+
         Rgb a = colors[i];
         Rgb b =  colors[i+1];
-        
+
         float t = (val - i*w)/w;
-        
+
         return { interpolate(a.red, b.red, t),
                 interpolate(a.green, b.green, t),
                 interpolate(a.blue, b.blue, t) };

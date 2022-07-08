@@ -5,7 +5,7 @@
 
 struct Status {
     bool is_error;
-    std::string error_message;  
+    std::string error_message;
     size_t line;
     size_t col;
 

@@ -31,10 +31,10 @@ void print_usage(const std::string& executable_name) {
 
 std::optional<size_t> parse_integer_argument(std::string_view arg_name, std::string_view arg_val) {
     std::string arg_string(arg_val);
-    
+
     size_t end = -1;
     uint32_t val = -1;
-    
+
     try {
         val = std::stol(arg_string, &end);
     } catch (const std::invalid_argument& ex) {
@@ -52,7 +52,7 @@ std::optional<size_t> parse_integer_argument(std::string_view arg_name, std::str
                   << " provided for the '" << arg_name << "' option.\n";
         return std::nullopt;
     }
-    
+
     return val;
 }
 

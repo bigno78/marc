@@ -29,15 +29,15 @@ struct SvgImage {
 
     void draw_rectangle(Rect rect, const Style& style) {
         svg_str << "<rect ";
-        
+
         svg_str << "x='" << rect.x << "' y='" << rect.y << "' ";
         svg_str << "width='" << rect.width << "' height='" << rect.height << "' ";
         svg_str << "fill='" << style.fill_color << "' ";
-        
+
         if (style.fill_opacity < 1) {
             svg_str << "fill-opacity='" << style.fill_opacity << "' ";
         }
-        
+
         if (style.border_width != 0) {
             svg_str << "stroke='" << style.border_color << "' ";
             svg_str << "stroke-width='" << style.border_width << "' ";
@@ -116,9 +116,9 @@ private:
                 }
                 float density = grid.count_at(row, col)/max_occupancy;
                 style.fill_color = config.color_palette.sample_color(density).to_string();
-                
+
                 image.draw_rectangle(block_rect, style);
-                
+
                 block_rect.x += config.block_size;
             }
             block_rect.y += config.block_size;
