@@ -8,19 +8,16 @@
 
 struct Grid {
 
-    Grid(const Header& header, size_t max_grid_rows, size_t max_grid_cols) :
-        block_size_( get_block_size(header.rows, header.cols, max_grid_rows, max_grid_cols) ),
-        grid_rows( div_ceil(header.rows, block_size_) ),
-        grid_cols( div_ceil(header.cols, block_size_) ),
-        data( grid_rows*grid_cols, 0 ),
-        matrix_symmetry(header.symmetry)
-    { 
-
-    }
+    Grid(const Header& header, size_t max_grid_rows, size_t max_grid_cols)
+        : block_size_( get_block_size(header.rows, header.cols, max_grid_rows, max_grid_cols) ),
+          grid_rows_( div_ceil(header.rows, block_size_) ),
+          grid_cols_( div_ceil(header.cols, block_size_) ),
+          data_( grid_rows_*grid_cols_, 0 ),
+          matrix_symmetry_(header.symmetry) { }
 
     void on_entry(size_t row, size_t col) {
         add_entry(row, col);
-        if (matrix_symmetry != Symmetry::general && row != col) {
+        if (matrix_symmetry_ != Symmetry::general && row != col) {
             add_entry(col, row);
         }
     }
@@ -38,21 +35,21 @@ struct Grid {
     }
 
     size_t rows() const {
-        return grid_rows;
+        return grid_rows_;
     }
 
     size_t cols() const {
-        return grid_cols;
+        return grid_cols_;
     }
 
     size_t entries() const {
-        return entries_count;
+        return entries_count_;
     }
 
 private:
 
     const size_t& at(size_t row, size_t col) const {
-        return data[row*grid_cols + col];
+        return data_[row*grid_cols_ + col];
     }
 
     size_t& at(size_t row, size_t col) {
@@ -61,7 +58,7 @@ private:
 
     void add_entry(size_t row, size_t col) {
         at(row/block_size_, col/block_size_)++;
-        entries_count++;
+        entries_count_++;
     }
 
     size_t get_block_size(size_t matrix_rows,
@@ -82,12 +79,12 @@ private:
 private:
     size_t block_size_;
 
-    size_t grid_rows;
-    size_t grid_cols;
+    size_t grid_rows_;
+    size_t grid_cols_;
 
-    std::vector<size_t> data;
+    std::vector<size_t> data_;
 
-    size_t entries_count = 0;
+    size_t entries_count_ = 0;
 
-    Symmetry matrix_symmetry;
+    Symmetry matrix_symmetry_;
 };
