@@ -2,9 +2,10 @@
 
 `marc` is a tool for visualizing sparse matrices in matrix market format.
 
-For given sparse matrix, it produces an image that displays the density of non-zeroes. Each part of the matrix is colored and the higher the intensity of the color the more non-zeros in that particular region of the matrix there are. Here is one example:
+For given sparse matrix, it produces an image that displays the density of non-zeroes. Each part of the matrix is colored and the higher the intensity of the color the more non-zeros in that particular region of the matrix there are. Here are some examples:
 
-TODO: add image
+![pkustk13](data/pkustk13.svg "pkustk13")
+![twotone](data/twotone.svg "twotone")
 
 ## How it works
 
