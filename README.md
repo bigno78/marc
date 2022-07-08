@@ -26,6 +26,19 @@ There are two ways colors can be assigned to blocks. One way is to map each poss
 
 The other option is to adjust the color range to only map to the actual occupation of the blocks. Meaning 0 is still white but now the highest intensity is assigned to the maximum occupation in all of the blocks. This can be turned on using the `--adjust-colors` options.
 
+## Building
+
+There are no dependencies, the only requirement is a c++17 compiler and *cmake*.
+
+`marc` can be easily built using the standard *cmake* workflow:
+
+```bash
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ make
+```
+
 ## Usage
 
 The basic usage is:
@@ -38,5 +51,8 @@ If you don't specify the output filename using the `-o` option, `out.svg` is use
 
 Other options include:
 
- - `-v` enables verbose output (prints parameters of the matrix, the constructed grid and the output image).
- - `-w <number>` and `-h <number>` are used to control the size of the output image. Currently, it is impossible to guarantee
+ - `-v` enables verbose output.
+
+ - `-w`, `--width` and `-h`, `--height` are used to specify the maximum size of the output image. The image is guaranteed to fit into this area but might be smaller. For more information see the section [Image size considerations](#image-size-considerations). If only one dimension is specified the other is computed using the aspect ratio of the matrix. If none of them is specified a default value of 600 by 600 is used.
+
+ - `-a`, `--adjust-colors` can be used to adjust the colors as described in [Colors](#colors).
