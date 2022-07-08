@@ -42,7 +42,7 @@ $ make
 
 ## Installing
 
-If you want to install `marc` system wide you can simple run the following command in the build directory:
+If you want to install `marc` system-wide you can simple run the following command in the build directory:
 
 ```bash
 $ sudo cmake --install .
