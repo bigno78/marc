@@ -2,6 +2,7 @@
 
 #include <istream>
 #include <string>
+#include <array>
 
 #include "parsing/status.hpp"
 #include "grid.hpp"

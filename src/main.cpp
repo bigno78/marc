@@ -51,10 +51,10 @@ ImageConfig init_image_config(const Header& header, const CmdOptions& opts) {
         config.viewport_height = opts.height.value();
     } else if(opts.width) {
         config.viewport_width = opts.width.value();
-        config.viewport_height = (config.viewport_width*header.rows)/float(header.cols);
+        config.viewport_height = (size_t) ((config.viewport_width*header.rows)/float(header.cols));
     } else if (opts.height) {
         config.viewport_height = opts.height.value();
-        config.viewport_width = (config.viewport_height*header.cols)/float(header.rows);
+        config.viewport_width = (size_t) ((config.viewport_height*header.cols)/float(header.rows));
     }
 
     config.path = opts.output_filename;

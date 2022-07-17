@@ -44,9 +44,9 @@ struct ColorPalette {
             return { 255, 255, 255 };
         }
 
-        float w = 1.0/(colors.size() - 1);
+        float w = 1.0f/(colors.size() - 1);
 
-        size_t i = val*(colors.size() - 1);
+        size_t i = (size_t) (val*(colors.size() - 1));
 
         Rgb a = colors[i];
         Rgb b =  colors[i+1];
@@ -60,7 +60,7 @@ struct ColorPalette {
 
 private:
     uint8_t interpolate(uint8_t a, uint8_t b, float t) const {
-        return (1 - t)*a + t*b;
+        return (uint8_t) ((1 - t)*a + t*b);
     }
 
 private:

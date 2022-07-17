@@ -37,11 +37,11 @@ std::optional<size_t> parse_integer_argument(std::string_view arg_name, std::str
 
     try {
         val = std::stol(arg_string, &end);
-    } catch (const std::invalid_argument& ex) {
+    } catch (const std::invalid_argument& /*ex*/) {
         std::cerr << "Error: Invalid value '" << arg_val << "'"
                   << " provided for the '" << arg_name << "' option.\n";
         return std::nullopt;
-    } catch (const std::out_of_range& ex) {
+    } catch (const std::out_of_range& /*ex*/) {
         std::cerr << "Error: Whoa! The value '" << arg_val << "' provided for the "
                   << "'" << arg_name << "' option is a bit too large buddy.\n";
         return std::nullopt;

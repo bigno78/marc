@@ -25,7 +25,7 @@ struct Style {
 
 struct SvgImage {
 
-    SvgImage(float width, float height) : max_x(width), max_y(height) {}
+    SvgImage(size_t width, size_t height) : max_x(width), max_y(height) {}
 
     void draw_rectangle(Rect rect, const Style& style) {
         svg_str << "<rect ";
@@ -64,8 +64,8 @@ private:
 
     std::stringstream svg_str;
 
-    float max_x;
-    float max_y;
+    size_t max_x;
+    size_t max_y;
 };
 
 
@@ -105,7 +105,7 @@ private:
         Style style { "black", 1, "black", 0 };
         Rect block_rect = { 0, config.border_size, config.block_size, config.block_size };
 
-        float max_occupancy = config.adjust_colors ? grid.max_occupancy() : grid.block_capacity();
+        size_t max_occupancy = config.adjust_colors ? grid.max_occupancy() : grid.block_capacity();
 
         for (size_t row = 0; row < grid.rows(); ++row) {
             block_rect.x = config.border_size;
@@ -114,7 +114,7 @@ private:
                     block_rect.x += config.block_size;
                     continue;
                 }
-                float density = grid.count_at(row, col)/max_occupancy;
+                float density = grid.count_at(row, col)/(float)max_occupancy;
                 style.fill_color = config.color_palette.sample_color(density).to_string();
 
                 image.draw_rectangle(block_rect, style);
