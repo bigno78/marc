@@ -108,10 +108,18 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    std::ifstream file(opts->input_filename);
+    std::optional<std::ifstream> input_file;
+    if (opts->input_filename) {
+        input_file = std::ifstream(opts->input_filename.value());
+    } else {
+        std::ios_base::sync_with_stdio(false);
+        std::cin.tie(0);
+    }
+
+    std::istream& input = input_file ? *input_file : std::cin;
 
     Header header;
-    auto status = parse_header(file, header);
+    auto status = parse_header(input, header);
 
     if (!status) {
         print_parsing_error(status);
@@ -130,7 +138,7 @@ int main(int argc, char** argv) {
     ImageConfig image_config = init_image_config(header, *opts);
     Grid grid = make_grid(header, image_config, *opts);
 
-    status = read_entries_custom(file, header, grid);
+    status = read_entries_custom(input, header, grid);
     if (!status) {
         print_parsing_error(status);
         return EXIT_FAILURE;

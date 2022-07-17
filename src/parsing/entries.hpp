@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fstream>
+#include <istream>
 #include <string>
 
 #include "parsing/status.hpp"
@@ -117,7 +117,7 @@ Status read_entries_getline(std::ifstream& input, const Header& header, Grid& gr
 }
 
 
-Status read_entries_custom(std::ifstream& file, const Header& header, Grid& grid) {
+Status read_entries_custom(std::istream& file, const Header& header, Grid& grid) {
     constexpr size_t buffer_size = 4096;
     std::array<char, buffer_size> buffer = { 0 };
 

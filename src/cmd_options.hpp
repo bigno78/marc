@@ -7,7 +7,7 @@
 #include <sstream>
 
 struct CmdOptions {
-    std::string input_filename;
+    std::optional<std::string> input_filename;
     std::string output_filename = "out.svg";
 
     std::optional<size_t> width;
@@ -95,18 +95,12 @@ std::optional<CmdOptions> parse_args(int argc, char** argv) {
         } else if (arg == "-a" || arg == "--adjust-colors") {
             opts.adjust_colors = true;
         } else {
-            if (!opts.input_filename.empty()) {
-                std::cout << "Error: Multiple input files specified: '" << opts.input_filename << "' and '" << arg << "'.\n";
+            if (opts.input_filename) {
+                std::cout << "Error: Multiple input files specified: '" << *opts.input_filename << "' and '" << arg << "'.\n";
                 return std::nullopt;
             }
             opts.input_filename = arg;
         }
-    }
-
-    if (opts.input_filename.empty()) {
-        std::cout << "Error: No input file specified.\n\n";
-        print_usage(argv[0]);
-        return std::nullopt;
     }
 
     return opts;
