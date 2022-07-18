@@ -14,6 +14,8 @@
 #include "cmd_options.hpp"
 
 #include "drawing/draw.hpp"
+#include "drawing/generic.hpp"
+#include "drawing/stb_image.hpp"
 #include "drawing/svg.hpp"
 
 void print_parsing_error(const Status& status) {
@@ -96,8 +98,8 @@ void draw_grid(const Grid& grid, ImageConfig& image_config, const CmdOptions& op
         std::cout << "\n";
     }
 
-    SvgDrawer svg;
-    svg(grid, image_config);
+    GenericDrawer<StbImage> drawer;
+    drawer(grid, image_config);
 }
 
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <drawing/draw.hpp>
 #include <stb_image_write.h>
 

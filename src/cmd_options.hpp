@@ -8,7 +8,7 @@
 
 struct CmdOptions {
     std::optional<std::string> input_filename;
-    std::string output_filename = "out.svg";
+    std::string output_filename = "out.png";
 
     std::optional<size_t> width;
     std::optional<size_t> height;

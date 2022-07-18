@@ -30,13 +30,6 @@ struct Rect {
     size_t height;
 };
 
-struct Style {
-    std::string fill_color;
-    float fill_opacity;
-    std::string border_color;
-    float border_width;
-};
-
 struct ColorPalette {
 
     ColorPalette(const std::vector<Rgb>& colors) : colors(colors) {}
@@ -90,14 +83,14 @@ struct ImageConfig {
     size_t width;
     size_t height;
 
-    size_t block_size = 1;
+    size_t block_size = 2;
 
     size_t border_size = 2;
 
     ColorPalette color_palette = ColorPalette::blue();
 
-    size_t viewport_width = 600;
-    size_t viewport_height = 600;
+    size_t viewport_width = 1024;
+    size_t viewport_height = 1024;
 
     bool adjust_colors = false;
 };
