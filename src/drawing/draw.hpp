@@ -21,6 +21,22 @@ struct Rgb {
 
 };
 
+struct Rect {
+    // coordinates of upper left corner
+    size_t x;
+    size_t y;
+
+    size_t width;
+    size_t height;
+};
+
+struct Style {
+    std::string fill_color;
+    float fill_opacity;
+    std::string border_color;
+    float border_width;
+};
+
 struct ColorPalette {
 
     ColorPalette(const std::vector<Rgb>& colors) : colors(colors) {}

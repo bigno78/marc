@@ -7,22 +7,6 @@
 #include <stdexcept>
 
 
-// x and y are the coordinates of upper left corner
-struct Rect {
-    size_t x;
-    size_t y;
-    size_t width;
-    size_t height;
-};
-
-struct Style {
-    std::string fill_color;
-    float fill_opacity;
-    std::string border_color;
-    float border_width;
-};
-
-
 struct SvgImage {
 
     SvgImage(size_t width, size_t height) : max_x(width), max_y(height) {}
