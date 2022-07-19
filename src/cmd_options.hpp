@@ -33,9 +33,12 @@ Options
   -h <height>
   --height <height>  The maximum height of the image.
                      The actual height can be smaller.
-  -a,
+  -a
   --adjust-colors    Compute colors based on the maximum occupancy of blocks
                      instead of based on block capacity.
+  -f <fmt>
+  --output-format <fmt>  The format of the output image.
+                         Can be on of: png, jpg, bmp, tga, svg
 )";
 
 void print_usage(const std::string& executable_name) {
