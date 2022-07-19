@@ -76,6 +76,13 @@ private:
     std::vector<Rgb> colors;
 };
 
+enum class ImageFormat {
+    svg,
+    png,
+    jpg,
+    bmp,
+    tga
+};
 
 struct ImageConfig {
     std::string path;
@@ -93,6 +100,8 @@ struct ImageConfig {
     size_t viewport_height = 1024;
 
     bool adjust_colors = false;
+
+    ImageFormat format;
 };
 
 

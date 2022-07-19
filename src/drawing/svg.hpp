@@ -24,11 +24,15 @@ struct SvgImage {
         svg_str_ << "/>\n";
     }
 
-    void save(const std::string& path) const {
+    void save(const std::string& path, ImageFormat format) const {
+        if (format != ImageFormat::svg) {
+            throw std::runtime_error("SvgImage: Unsupported format");
+        }
+
         std::ofstream out(path);
 
         if (!out) {
-            throw std::runtime_error("Cannot create file " + path);
+            throw std::runtime_error("SvgImage: Cannot create file " + path);
         }
 
         out << "<svg xmlns='http://www.w3.org/2000/svg'\n";

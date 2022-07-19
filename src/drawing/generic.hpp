@@ -11,7 +11,7 @@ struct GenericDrawer : ImageDrawer {
         draw_borders(image, config);
         draw_grid(image, config, grid);
 
-        image.save(config.path);
+        image.save(config.path, config.format);
     }
 
 private:

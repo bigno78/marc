@@ -4,6 +4,16 @@
 #include <stb_image_write.h>
 
 #include <cstring> // memcpy
+#include <map>
+
+int write_png(char const *filename, int w, int h, int comp, const void *data) {
+    return stbi_write_png(filename, w, h, 4, data, w*4);
+}
+
+int write_jpg(char const *filename, int w, int h, int comp, const void *data) {
+    // quality is 1 - 100, use a compromise of 50
+    return stbi_write_jpg(filename, w, h, 4, data, 50);
+}
 
 struct StbImage {
 
@@ -11,6 +21,14 @@ struct StbImage {
         : width_(width),
           height_(height),
           data_(width*height, rgb_to_u32(background)) { }
+
+    size_t width() const {
+        return width_;
+    }
+
+    size_t height() const {
+        return height_;
+    }
 
     void draw_rectangle(Rect rect, Rgb color) {
         for (size_t x = rect.x; x < rect.x + rect.width; ++x) {
@@ -20,21 +38,21 @@ struct StbImage {
         }
     }
 
-    void save(const std::string& path) const {
-        int res = stbi_write_png(path.c_str(), (int)width_, (int)height_, 4, data_.data(), (int)width_*4);
+    void save(const std::string& path, ImageFormat format) const {
+        auto it = write_functions_.find(format);
 
-        if (!res) {
-            throw std::runtime_error("stb_image: Cannot save image into file " + path + ".");
+        if (it == write_functions_.end()) {
+            throw std::runtime_error("StbImage: Unsupported format.");
+        }
+
+        auto write_func = it->second;
+        int result = write_func(path.c_str(), (int)width_, (int)height_, 4, data_.data());
+
+        if (!result) {
+            throw std::runtime_error("StbImage: Cannot save image into file " + path + ".");
         }
     }
 
-    size_t width() const {
-        return width_;
-    }
-
-    size_t height() const {
-        return height_;
-    }
 
 private:
     void write_pixel(size_t x, size_t y, Rgb color) {
@@ -52,4 +70,11 @@ private:
     size_t height_;
 
     std::vector<uint32_t> data_;
+
+    std::map<ImageFormat, int(*)(const char*, int, int, int, const void*)> write_functions_ = {
+        { ImageFormat::png, write_png },
+        { ImageFormat::jpg, write_jpg },
+        { ImageFormat::bmp, stbi_write_bmp },
+        { ImageFormat::tga, stbi_write_tga }
+    };
 };
