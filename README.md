@@ -9,7 +9,7 @@ For given sparse matrix, it produces an image that displays the density of non-z
 
 ## How it works
 
-Typically, sparse matrices are very large, so we can't just draw each element as one pixel since the resulting image would be gigantic. Instead, `marc` splits the matrix into square blocks and counts the number of non-zeros in each of them. This way we obtain a grid of blocks thats is much smaller and now each block can be drawn as a pixel with a color corresponding to the ratio between the number of non-zeros and its capacity.
+Typically, sparse matrices are very large, so we can't draw all elements of the matrix, even if they are drawn as one pixel only, since the resulting image would be gigantic. Instead, `marc` splits the matrix into square blocks and counts the number of non-zeros in each of them. This way we obtain a grid of blocks that is much smaller and thus results into a much smaller image.
 
 ## Image size considerations
 
@@ -64,7 +64,9 @@ The basic usage is:
 $ marc <input-file> -o <output-file>
 ```
 
-If you don't specify the output filename using the `-o` option, `out.svg` is used by default.
+The default file format is `png` but you can select one of `png`, `jpg`, `bmp`, `tga` or `svg` using the `--output-format` option.
+
+If you don't specify the output filename using the `-o` option, the default is `out` with a file extension determined by the chosen file format.
 
 Other options include:
 
@@ -73,3 +75,5 @@ Other options include:
  - `-w`, `--width` and `-h`, `--height` are used to specify the maximum size of the output image. The image is guaranteed to fit into this area but might be smaller. For more information see the section [Image size considerations](#image-size-considerations). If only one dimension is specified the other is computed using the aspect ratio of the matrix. If none of them is specified a default value of 600 by 600 is used.
 
  - `-a`, `--adjust-colors` can be used to adjust the colors as described in [Colors](#colors).
+
+ - `-f`, `--output-format` determines the format of the output image. Can be one of `png`, `jpg`, `bmp`, `tga` or `svg`.

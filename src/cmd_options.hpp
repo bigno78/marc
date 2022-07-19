@@ -1,17 +1,21 @@
 #pragma once
 
-#include <charconv>
+#include <drawing/draw.hpp>
+
+#include <algorithm>
 #include <iostream>
 #include <optional>
 #include <string>
-#include <sstream>
+#include <map>
 
 struct CmdOptions {
     std::optional<std::string> input_filename;
-    std::string output_filename = "out.svg";
+    std::optional<std::string> output_filename;
 
     std::optional<size_t> width;
     std::optional<size_t> height;
+
+    ImageFormat image_format = ImageFormat::png;
 
     bool verbose = false;
     bool adjust_colors = false;
@@ -29,9 +33,12 @@ Options
   -h <height>
   --height <height>  The maximum height of the image.
                      The actual height can be smaller.
-  -a,
+  -a
   --adjust-colors    Compute colors based on the maximum occupancy of blocks
                      instead of based on block capacity.
+  -f <fmt>
+  --output-format <fmt>  The format of the output image.
+                         Can be on of: png, jpg, bmp, tga, svg
 )";
 
 void print_usage(const std::string& executable_name) {
@@ -64,6 +71,29 @@ std::optional<size_t> parse_integer_argument(std::string_view arg_name, std::str
     }
 
     return val;
+}
+
+std::optional<ImageFormat> parse_image_format(std::string format_string) {
+    static std::map<std::string, ImageFormat> formats = {
+        { "svg", ImageFormat::svg },
+        { "png", ImageFormat::png },
+        { "jpg", ImageFormat::jpg },
+        { "jpeg", ImageFormat::jpg },
+        { "bmp", ImageFormat::bmp },
+        { "tga", ImageFormat::tga },
+    };
+
+    for (auto& c : format_string) {
+        c = std::tolower((unsigned)c);
+    }
+
+    auto it = formats.find(format_string);
+
+    if (it == formats.end()) {
+        return std::nullopt;
+    }
+
+    return it->second;
 }
 
 std::optional<CmdOptions> parse_args(int argc, char** argv) {
@@ -104,6 +134,18 @@ std::optional<CmdOptions> parse_args(int argc, char** argv) {
             }
         } else if (arg == "-a" || arg == "--adjust-colors") {
             opts.adjust_colors = true;
+        } else if (arg == "-f" || arg == "--output-format") {
+            if (i >= argc - 1) {
+                std::cerr << "Error: No value specified for '" << arg << "'.\n";
+                return std::nullopt;
+            }
+            i++;
+            auto format = parse_image_format(argv[i]);
+            if (!format) {
+                std::cerr << "Error: Unsupported image format '" << argv[i] << "'.\n";
+                return std::nullopt;
+            }
+            opts.image_format = *format;
         } else {
             if (opts.input_filename) {
                 std::cout << "Error: Multiple input files specified: '" << *opts.input_filename << "' and '" << arg << "'.\n";

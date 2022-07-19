@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <string_view>
+#include <map>
 
 #include "parsing/parser.hpp"
 
@@ -14,6 +15,8 @@
 #include "cmd_options.hpp"
 
 #include "drawing/draw.hpp"
+#include "drawing/generic.hpp"
+#include "drawing/stb_image.hpp"
 #include "drawing/svg.hpp"
 
 void print_parsing_error(const Status& status) {
@@ -43,6 +46,17 @@ void print_matrix_info(const Header& header) {
     std::cout << "\n\n";
 }
 
+std::string get_image_extension(ImageFormat format) {
+    static std::map<ImageFormat, std::string> extensions = {
+        { ImageFormat::png, ".png" },
+        { ImageFormat::jpg, ".jpg" },
+        { ImageFormat::bmp, ".bmp" },
+        { ImageFormat::tga, ".tga" },
+        { ImageFormat::svg, ".svg" },
+    };
+    return extensions.at(format);
+}
+
 ImageConfig init_image_config(const Header& header, const CmdOptions& opts) {
     ImageConfig config;
 
@@ -57,8 +71,14 @@ ImageConfig init_image_config(const Header& header, const CmdOptions& opts) {
         config.viewport_width = (size_t) ((config.viewport_height*header.cols)/float(header.rows));
     }
 
-    config.path = opts.output_filename;
+    if (!opts.output_filename) {
+        config.path = "out" + get_image_extension(opts.image_format);
+    } else {
+        config.path = opts.output_filename.value();
+    }
+
     config.adjust_colors = opts.adjust_colors;
+    config.format = opts.image_format;
 
     return config;
 }
@@ -96,8 +116,13 @@ void draw_grid(const Grid& grid, ImageConfig& image_config, const CmdOptions& op
         std::cout << "\n";
     }
 
-    SvgDrawer svg;
-    svg(grid, image_config);
+    if (image_config.format == ImageFormat::svg) {
+        GenericDrawer<SvgImage> drawer;
+        drawer(grid, image_config);
+    } else {
+        GenericDrawer<StbImage> drawer;
+        drawer(grid, image_config);
+    }
 }
 
 
@@ -120,7 +145,6 @@ int main(int argc, char** argv) {
 
     Header header;
     auto status = parse_header(input, header);
-
     if (!status) {
         print_parsing_error(status);
         return EXIT_FAILURE;
